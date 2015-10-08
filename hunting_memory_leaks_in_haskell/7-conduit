@@ -1,0 +1,3 @@
+* with using conduit I was able to lower memory consumption to only 2M per core (no matter how big an input was).
+* it took me 1 hour to implement paralell conduit implementation from serial.
+* next time more about it

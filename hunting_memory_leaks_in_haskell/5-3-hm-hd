@@ -1,0 +1,18 @@
+* from hm we could see that probable couse was Record.hs module (which contains fromBs), Well, that wasn't too helpful.
+* but hd told us more. <Aggregates.Record.sat_*> means that most of our memory usega comes from Record thunks
+
+NOTE: explain what thunk is!
+
+* record definition looks ok (it is strict)
+data Record = Record {
+                      recId :: !Int
+                      someField :: !SomeType
+                      .
+                      .
+                      .
+                      .
+                      .
+                      .
+                      }
+
+* so problem must have come from outside, from something calling this fromBS. We can find out by trying to find who is retainer of fromBs: -hr -hcfromBs

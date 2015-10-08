@@ -1,0 +1,53 @@
+* this graph is telling us that something is going on in contentsTest function (in go, out, step local functions). Code of contentsTest looks like (simplified a lot):
+
+contentsTest :: Sink Record m ([TestOutput], SomeHashMap)
+contentsTest  = go mempty mempty []
+  where
+  go rbs out recs = await >>= maybe
+    (return (out ++ test recs, rbs))
+    (\r -> step (go $ addRelBuzz t r rbs) out recs r)
+  step f out recs r = case recs of
+    [] -> f out [r]
+    (r1:_) -> if
+      | someCondition r r1 ->
+        f out (recs ++ [r])
+      | otherwise ->
+        f (out ++ skipIgnored ignored (test recs)) [r]
+
+* this is clearly some tight loop. It uses recursion to collect Records in some way and pack them to tuple ([TestOutput], SomeHashMap). This code is basicly doing:
+
+map (stuff . test) $ grouBy (someCondition) xs
+
+but I figured out that much later.
+
+* without much thinking I have added bangs to all arguments of go and step functions:
+ ....
+  go !rbs !out !recs = await >>= maybe
+    (return (out >< test recs, rbs))
+    (\r -> step (go $ addRelBuzz t r rbs) out recs r)
+  step !f !out !recs !r = case recs of
+ ....
+
+* after compiling and running there was a line saying:
+
+ 97 MB total memory in use (0 MB lost due to fragmentation)
+
+* when compiled without profiling it was:
+ 47 MB total memory in use (0 MB lost due to fragmentation)
+
+* so as a result I was :)
+
+* the same conclusion could be done much sooner by profiling limitting stack with -xc -K64k
+
+*** Exception (reporting due to +RTS -xc): (THUNK_STATIC), stack trace: 
+  Aggregates.Tests.contentsTest.step,
+  called from Aggregates.Tests.contentsTest.go.\,
+  called from Aggregates.Tests.contentsTest.go,
+  called from Aggregates.Tests.contentsTest,
+  called from Aggregates.Tests.test.fileTest,
+  called from Aggregates.Tests.test,
+  called from Main.runCommand,
+  called from Main.main
+
+
+NOTE: explain bang patterns, lazy-strict haskell (memory2.hs)

@@ -1,0 +1,32 @@
+* fromBs was creating a Record from one line of an input.
+
+fromBs :: Fields -> FieldsFormat -> B.ByteString -> Record
+fromBs header fmt row = Record
+    { recId = ...
+    .
+    .
+    .
+    bunch of fields
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    .
+    }
+
+* so ok, I came to concluson that problem might be in accumulating Records
+* this is confirmed by running -hd and -hm
+
+-hc cost-centre stack which produced the data.
+
+-hm  module containing the code which produced the data.
+
+-hd  constructor name, for other closures it is a compiler-generated string identifying the closure.
+
+-hy by type
+
+-hr by retainer set
+-hb by biography (lag, use, drag, void)
